@@ -8,5 +8,17 @@
 - `main.py` — консольное меню, валидация, интерфейс
 - `students.txt` — пример файла с фамилиями
 
-## Запуск
-```bash python main.py
+
+## ⚙️ Требования
+- Python 3.8 или выше
+- Без внешних библиотек (только стандартная библиотека)
+- Операционная система: Windows / Linux / macOS
+
+## 🚀 Запуск
+
+### 1. Клонирование репозитория
+```bash
+git clone https://github.com/crow369-a11y/Good-deed-Rating.git
+cd Good-deed-Rating
+python3 main.py
+python main.py
