@@ -1,31 +1,49 @@
-import random
+from typing import Optional
 from structures import StudentCircle, Student
+
+class CustomRandom:
+    def __init__(self, seed: Optional[int] = None):
+        self.state = seed if seed is not None else 123456789 
+
+    def randint(self, a: int, b: int) -> int:
+        m = 2**31
+        a_mult = 1103515245
+        c = 12345
+        
+        self.state = (a_mult * self.state + c) % m
+        range_size = b - a + 1
+        return a + (self.state % range_size)
 
 
 class GameEngine:
-    """Управляет состоянием игры, раундами и протоколом."""
     def __init__(self):
         self._circle = StudentCircle()
-        self._current: Student = None
+        self._current: Optional[Student] = None
         self._protocol: list[dict] = []
+        self._rng = CustomRandom()
 
     def load_from_file(self, filepath: str) -> None:
-        """Загружает фамилии из файла и инициализирует круг."""
-        with open(filepath, 'r', encoding='utf-8') as f:
-            for line in f:
-                name = line.strip()
-                if name:
-                    self._circle.add_student(name)
-        if not self._circle.is_empty():
-            self._current = self._circle.head
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                for line in f:
+                    name = line.strip()
+                    if name:
+                        self._circle.add_student(name)
+            
+            if not self._circle.is_empty():
+                self._current = self._circle.head
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Файл '{filepath}' не найден.")
+        except PermissionError:
+            raise PermissionError(f"Нет прав на чтение файла '{filepath}'.")
+        except UnicodeDecodeError:
+            raise ValueError(f"Ошибка кодировки файла '{filepath}'. Используйте UTF-8.")
 
     def is_ready(self) -> bool:
-        """Проверяет готовность к запуску."""
         return not self._circle.is_empty() and self._current is not None
 
     def play_round(self) -> dict:
-        """Выполняет один раунд. Возвращает данные для протокола."""
-        step = random.randint(-10, 10)
+        step = self._rng.randint(-10, 10)
         direction = 1 if step >= 0 else -1
         moves = abs(step) % self._circle.size if self._circle.size > 0 else 0
 
@@ -34,6 +52,7 @@ class GameEngine:
             target = target.next if direction == 1 else target.prev
 
         target.rating += 1
+
         self._current = target.next if direction == 1 else target.prev
 
         round_data = {
@@ -46,7 +65,6 @@ class GameEngine:
         return round_data
 
     def get_sorted_results(self) -> list[Student]:
-        """Возвращает учеников, отсортированных по убыванию рейтинга."""
         return sorted(
             self._circle.get_all(),
             key=lambda s: (-s.rating, s.original_index)
