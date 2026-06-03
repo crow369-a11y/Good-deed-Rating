@@ -50,7 +50,6 @@ class GameEngine:
         target = self._current
         for _ in range(moves):
             target = target.next if direction == 1 else target.prev
-
         target.rating += 1
         # Согласно заданию: следующий отсчет начинается с соседа 
         # текущего ученика в направлении движения (target.next или target.prev)
