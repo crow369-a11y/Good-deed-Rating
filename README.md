@@ -9,4 +9,4 @@
 - `students.txt` — пример файла с фамилиями
 
 ## Запуск
-```bash
+```bash python main.py
